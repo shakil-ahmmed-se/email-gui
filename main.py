@@ -62,7 +62,7 @@ def distribute_emails():
     progress_bar['value'] = 0
     progress_bar['maximum'] = len(emails)
 
-    batch_size = 1000  # Send 1K emails at a time
+    batch_size = 1000
     email_batches = [emails[i:i + batch_size] for i in range(0, len(emails), batch_size)]
 
     def send_emails_thread():
@@ -77,43 +77,20 @@ def distribute_emails():
 
     threading.Thread(target=send_emails_thread).start()
 
-def add_smtp():
-    frame = tk.Frame(smtp_frame)
-    frame.pack(fill=tk.X, pady=5, padx=10)
-
-    host_entry = tk.Entry(frame)
-    port_entry = tk.Entry(frame, width=5)
-    user_entry = tk.Entry(frame)
-    password_entry = tk.Entry(frame, show="*")
-    delete_button = tk.Button(frame, text="Delete", command=lambda: remove_smtp(frame))
-
-    host_entry.grid(row=0, column=1, padx=5, sticky='ew')
-    port_entry.grid(row=0, column=3, padx=5, sticky='ew')
-    user_entry.grid(row=0, column=5, padx=5, sticky='ew')
-    password_entry.grid(row=0, column=7, padx=5, sticky='ew')
-    delete_button.grid(row=0, column=8, padx=5, sticky='ew')
-
-    host_entry.insert(0, "smtp.gmail.com")
-    port_entry.insert(0, "587")
-
-    smtp_entries.append({'frame': frame, 'host': host_entry, 'port': port_entry, 'user': user_entry, 'password': password_entry})
-
-def remove_smtp(frame):
-    for smtp in smtp_entries:
-        if smtp['frame'] == frame:
-            smtp_entries.remove(smtp)
-            break
-    frame.destroy()
-
 def attach_file():
     file_path = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
     if file_path:
         attachment_label.config(text=file_path)
 
+def on_resize(event):
+    for widget in [email_list, subject_entry, body_text]:
+        widget.config(width=event.width)
+
 root = tk.Tk()
 root.title("Email Sending System")
-root.geometry("900x700")
+root.geometry("600x500")  # Reduced size for small devices
 root.resizable(True, True)
+root.bind("<Configure>", on_resize)
 
 style = ThemedStyle(root)
 style.set_theme("arc")
@@ -122,12 +99,12 @@ smtp_frame = tk.LabelFrame(root, text="SMTP Accounts", padx=10, pady=10)
 smtp_frame.pack(fill=tk.X, padx=10, pady=5)
 
 smtp_entries = []
-add_smtp_button = tk.Button(smtp_frame, text="Add SMTP", command=add_smtp)
+add_smtp_button = tk.Button(smtp_frame, text="Add SMTP")
 add_smtp_button.pack(pady=5)
 
 email_frame = tk.LabelFrame(root, text="Recipient Emails", padx=10, pady=10)
 email_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-email_list = tk.Text(email_frame, height=10)
+email_list = tk.Text(email_frame, height=5)  # Reduced height
 email_list.pack(fill=tk.BOTH, expand=True)
 
 subject_frame = tk.LabelFrame(root, text="Subject", padx=10, pady=10)
@@ -137,7 +114,7 @@ subject_entry.pack(fill=tk.X)
 
 body_frame = tk.LabelFrame(root, text="Email Body", padx=10, pady=10)
 body_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-body_text = tk.Text(body_frame, height=10)
+body_text = tk.Text(body_frame, height=5)  # Reduced height
 body_text.pack(fill=tk.BOTH, expand=True)
 
 attachment_frame = tk.LabelFrame(root, text="Attachment", padx=10, pady=10)
@@ -151,6 +128,6 @@ progress_bar = ttk.Progressbar(root, orient=tk.HORIZONTAL, mode="determinate")
 progress_bar.pack(fill=tk.X, padx=10, pady=5)
 
 send_button = tk.Button(root, text="Send Emails", command=distribute_emails)
-send_button.pack(pady=10)
+send_button.pack(fill=tk.X, padx=10, pady=5)
 
 root.mainloop()
